@@ -1,40 +1,32 @@
-from flask import Flask, request, render_template, jsonify
+import streamlit as st
 import pickle
 import numpy as np
-
-app = Flask(__name__)
 
 # Load your trained model
 model_path = 'bitcoin_price_model.pkl'
 with open(model_path, 'rb') as model_file:
     model = pickle.load(model_file)
 
-@app.route('/')
-def home():
-    """Render the home page with the input form."""
-    return render_template('index.html')
+# Streamlit webpage layout
+st.title('Bitcoin Price Prediction')
 
-@app.route('/predict', methods=['POST'])
-def predict():
-    """Receive input features from the form and return the model prediction."""
-    try:
-        # Extract features from the form
-        open_price = float(request.form['open'])
-        high = float(request.form['high'])
-        low = float(request.form['low'])
-        price_lag1 = float(request.form['price_lag1'])
-        price_7day_rolling_mean = float(request.form['price_7day_rolling_mean'])
+# Creating input fields for the features
+open_price = st.number_input('Open Price', value=0.0, format="%.2f")
+high = st.number_input('High Price', value=0.0, format="%.2f")
+low = st.number_input('Low Price', value=0.0, format="%.2f")
+price_lag1 = st.number_input('Price Lag 1', value=0.0, format="%.2f")
+price_7day_rolling_mean = st.number_input('Price 7-Day Rolling Mean',
+                                          value=0.0, format="%.2f")
 
-        # Prepare the feature array for prediction
-        features = np.array([[open_price, high, low, price_lag1, price_7day_rolling_mean]])
+# Button to make prediction
+if st.button('Predict'):
+    # Prepare the feature array for prediction
+    features = np.array(
+        [[open_price, high, low, price_lag1, price_7day_rolling_mean]])
 
-        # Make prediction
-        prediction = model.predict(features)
+    # Make prediction
+    prediction = model.predict(features)
 
-        # Return the result
-        return render_template('index.html', prediction_text=f'Predicted Bitcoin Price: ${prediction[0]:,.2f}')
-    except Exception as e:
-        return jsonify({'error': str(e), 'message': 'Error processing the request'}), 500
+    # Display the prediction
+    st.write(f'Predicted Bitcoin Price: ${prediction[0]:,.2f}')
 
-if __name__ == "__main__":
-    app.run(debug=True)
