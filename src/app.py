@@ -3,7 +3,7 @@ import pickle
 import numpy as np
 
 # Load your trained model
-model_path = 'bitcoin_price_model.pkl'
+model_path = '../Models/bitcoin_price_model.pkl'
 with open(model_path, 'rb') as model_file:
     model = pickle.load(model_file)
 
